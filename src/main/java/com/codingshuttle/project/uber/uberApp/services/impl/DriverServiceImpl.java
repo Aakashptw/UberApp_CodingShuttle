@@ -54,17 +54,31 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public RideDto cancelRide(Long rideId) {
-        return null;
+
+        //Method to get the ride
+        Ride ride = rideService.getRideById(rideId);
+
+        //Check - If Rider really owns this ride
+        Driver driver = getCurrentDriver(); //to get the rider
+        if(!driver.equals(ride.getDriver())) {
+            throw new RuntimeException("Driver cannot start a ride as he has not accepted it earlier");
+        }
+        //to check rideStatus - only if you are in ride CONFIRMED status then can cancel the ride
+        if (!ride.getRideStatus().equals(RideStatus.CONFIRMED)){
+            throw new RuntimeException("Ride can not be cancelled, Invalid status " + ride.getRideStatus());
+        }
+        //mark the ride status as CANCELLED
+        rideService.updateRideStatus(ride, RideStatus.CANCELLED);
+        driver.setAvailable(true); //make the driver available after the previous ride cancellation
+        driverRepository.save(driver); //save the driver
+
+        return modelMapper.map(ride, RideDto.class);
     }
 
     @Override
     public RideDto startRide(Long rideId, String otp) {
+        //Method to get the ride
         Ride ride = rideService.getRideById(rideId);
-        Driver driver = getCurrentDriver();
-
-        if(!driver.equals(ride.getDriver())) {
-            throw new RuntimeException("Driver cannot start a ride as he has not accepted it earlier");
-        }
 
         if(!ride.getRideStatus().equals(RideStatus.CONFIRMED)) {
             throw new RuntimeException("Ride status is not CONFIRMED hence cannot be started, status: "+ride.getRideStatus());
@@ -101,6 +115,8 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public Driver getCurrentDriver() {
+
+        //getCurrentDriver is hardCoded
         return driverRepository.findById(2L).orElseThrow(() -> new ResourceNotFoundException("Driver not found with " +
                 "id "+2));
     }
