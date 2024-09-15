@@ -4,14 +4,14 @@ import com.codingshuttle.project.uber.uberApp.dto.DriverDto;
 import com.codingshuttle.project.uber.uberApp.dto.RideDto;
 import com.codingshuttle.project.uber.uberApp.dto.RideRequestDto;
 import com.codingshuttle.project.uber.uberApp.dto.RiderDto;
-import com.codingshuttle.project.uber.uberApp.entities.Driver;
-import com.codingshuttle.project.uber.uberApp.entities.RideRequest;
-import com.codingshuttle.project.uber.uberApp.entities.Rider;
-import com.codingshuttle.project.uber.uberApp.entities.User;
+import com.codingshuttle.project.uber.uberApp.entities.*;
 import com.codingshuttle.project.uber.uberApp.entities.enums.RideRequestStatus;
+import com.codingshuttle.project.uber.uberApp.entities.enums.RideStatus;
 import com.codingshuttle.project.uber.uberApp.exceptions.ResourceNotFoundException;
 import com.codingshuttle.project.uber.uberApp.repositories.RideRequestRepository;
 import com.codingshuttle.project.uber.uberApp.repositories.RiderRepository;
+import com.codingshuttle.project.uber.uberApp.services.DriverService;
+import com.codingshuttle.project.uber.uberApp.services.RideService;
 import com.codingshuttle.project.uber.uberApp.services.RiderService;
 import com.codingshuttle.project.uber.uberApp.strategies.RideStrategyManager;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +31,8 @@ public class RiderServiceImpl implements RiderService {
     private final RideStrategyManager rideStrategyManager;
     private final RideRequestRepository rideRequestRepository;
     private final RiderRepository riderRepository;
+    private final RideService rideService;
+    public final DriverService driverService;
 
     @Override
     @Transactional
@@ -55,7 +57,21 @@ public class RiderServiceImpl implements RiderService {
 
     @Override
     public RideDto cancelRide(Long rideId) {
-        return null;
+        Rider rider = getCurrentRider(); //to get the current rider
+        Ride ride = rideService.getRideById(rideId); //to get the ride
+
+        if (!rider.equals(ride.getRider())){ //TO check if rider really own current ride
+            throw new RuntimeException(("Rider does not own this Ride: " + rideId));
+        }
+        //to check rideStatus - only if you are in ride CONFIRMED status then can cancel the ride
+        if (!ride.getRideStatus().equals(RideStatus.CONFIRMED)){
+            throw new RuntimeException("Ride can not be cancelled, Invalid status " + ride.getRideStatus());
+        }
+        //mark the ride status as CANCELLED
+        Ride savedRide = rideService.updateRideStatus(ride, RideStatus.CANCELLED); //to update the ride status
+        driverService.updateDriverAvailability(ride.getDriver(), true); //to update the rider availability
+
+        return modelMapper.map(savedRide, RideDto.class);
     }
 
     @Override
