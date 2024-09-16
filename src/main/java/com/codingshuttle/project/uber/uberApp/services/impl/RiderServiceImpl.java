@@ -17,6 +17,8 @@ import com.codingshuttle.project.uber.uberApp.strategies.RideStrategyManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,7 +73,7 @@ public class RiderServiceImpl implements RiderService {
         Ride savedRide = rideService.updateRideStatus(ride, RideStatus.CANCELLED); //to update the ride status
         driverService.updateDriverAvailability(ride.getDriver(), true); //to update the rider availability
 
-        return modelMapper.map(savedRide, RideDto.class);
+        return modelMapper.map(savedRide, RideDto.class); //map the savedRider to RideDTO.class
     }
 
     @Override
@@ -81,12 +83,16 @@ public class RiderServiceImpl implements RiderService {
 
     @Override
     public RiderDto getMyProfile() {
-        return null;
+        Rider currentRider = getCurrentRider(); //to get the current rider
+        return modelMapper.map(currentRider, RiderDto.class); //mapped the currentRider to RiderDTO.class
     }
 
     @Override
-    public List<RideDto> getAllMyRides() {
-        return List.of();
+    public Page<RideDto> getAllMyRides(PageRequest pageRequest) {
+        Rider currentRider = getCurrentRider(); //to get the current rider
+
+        return rideService.getAllRidesOfRider(currentRider, pageRequest)
+                .map(ride -> modelMapper.map(ride, RideDto.class));
     }
 
     @Override
