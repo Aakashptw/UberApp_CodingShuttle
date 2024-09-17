@@ -1,9 +1,11 @@
 package com.codingshuttle.project.uber.uberApp.services.impl;
 
 import com.codingshuttle.project.uber.uberApp.dto.WalletTransactionDto;
+import com.codingshuttle.project.uber.uberApp.entities.WalletTransaction;
 import com.codingshuttle.project.uber.uberApp.repositories.WalletTransactionRepository;
 import com.codingshuttle.project.uber.uberApp.services.WalletTransactionService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -11,9 +13,13 @@ import org.springframework.stereotype.Service;
 public class WalletTransactionServiceImpl implements WalletTransactionService {
 
     private final WalletTransactionRepository walletTransactionRepository;
+    private final ModelMapper modelMapper;
 
     @Override
-    public void createNewWalletTransaction(WalletTransactionDto walletTransactionDto) {
+    public void createNewWalletTransaction(WalletTransaction walletTransaction) {
 
+        WalletTransaction walletTransaction = modelMapper
+                .map(walletTransaction, WalletTransaction.class);
+        walletTransactionRepository.save(walletTransaction);
     }
 }
