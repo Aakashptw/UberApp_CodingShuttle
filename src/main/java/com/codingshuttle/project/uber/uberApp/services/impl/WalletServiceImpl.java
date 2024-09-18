@@ -10,17 +10,25 @@ import com.codingshuttle.project.uber.uberApp.entities.enums.TransactionType;
 import com.codingshuttle.project.uber.uberApp.exceptions.ResourceNotFoundException;
 import com.codingshuttle.project.uber.uberApp.repositories.WalletRepository;
 import com.codingshuttle.project.uber.uberApp.services.WalletService;
+import com.codingshuttle.project.uber.uberApp.services.WalletTransactionService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class WalletServiceImpl implements WalletService {
 
     private final WalletRepository walletRepository;
+    private final ModelMapper modelMapper;
+    private final WalletTransactionService walletTransactionService;
 
     @Override
-    public Wallet addMoneyToWallet(User user, Double amount, String transactionId, Ride ride, TransactionMethod transactionMethod) {
+    @Transactional
+    public Wallet addMoneyToWallet(User user, Double amount,
+                                   String transactionId, Ride ride,
+                                   TransactionMethod transactionMethod) {
         Wallet wallet = findByUser(user);
         wallet.setBalance(wallet.getBalance() + amount);
 
@@ -34,13 +42,33 @@ public class WalletServiceImpl implements WalletService {
                 .amount(amount)
                 .build();
 
+        //this will create wallet transaction for us
+        walletTransactionService.createNewWalletTransaction(walletTransaction);
+
         return walletRepository.save(wallet);
     }
 
     @Override
-    public Wallet deductMoneyFromWallet(User user, Double amount) {
+    @Transactional
+    public Wallet deductMoneyFromWallet(User user, Double amount,
+                                        String transactionId, Ride ride,
+                                        TransactionMethod transactionMethod) {
         Wallet wallet = findByUser(user);
         wallet.setBalance(wallet.getBalance() - amount);
+
+        //this will create transaction object for us
+        WalletTransaction walletTransaction = WalletTransaction.builder()
+                .transactionId(transactionId)
+                .ride(ride)
+                .wallet(wallet)
+                .transactionType(TransactionType.DEBIT)
+                .transactionMethod(transactionMethod)
+                .amount(amount)
+                .build();
+
+        //this will create wallet transaction for us
+        walletTransactionService.createNewWalletTransaction(walletTransaction);
+
         return walletRepository.save(wallet);
     }
 

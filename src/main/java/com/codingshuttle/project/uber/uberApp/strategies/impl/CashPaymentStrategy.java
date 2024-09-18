@@ -2,7 +2,9 @@ package com.codingshuttle.project.uber.uberApp.strategies.impl;
 
 import com.codingshuttle.project.uber.uberApp.entities.Driver;
 import com.codingshuttle.project.uber.uberApp.entities.Payment;
-import com.codingshuttle.project.uber.uberApp.entities.Wallet;
+import com.codingshuttle.project.uber.uberApp.entities.enums.PaymentStatus;
+import com.codingshuttle.project.uber.uberApp.entities.enums.TransactionMethod;
+import com.codingshuttle.project.uber.uberApp.services.PaymentService;
 import com.codingshuttle.project.uber.uberApp.services.WalletService;
 import com.codingshuttle.project.uber.uberApp.strategies.PaymentStrategy;
 import lombok.RequiredArgsConstructor;
@@ -13,18 +15,20 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class CODPaymentStrategy implements PaymentStrategy {
+public class CashPaymentStrategy implements PaymentStrategy {
 
     private final WalletService walletService;
+    private final PaymentService paymentService;
 
     @Override
     public void processPayment(Payment payment) {
         Driver driver = payment.getRide().getDriver();//to get the driver of the assigned ride
 
-        Wallet driverWallet = walletService.findByUser(driver.getUser());
+//        Wallet driverWallet = walletService.findByUser(driver.getUser());
         double platformCommission = payment.getAmount() * PLATFORM_COMMISSION;//commission calculation
-        walletService.deductMoneyFromWallet(driver.getUser(), platformCommission);//method to deduct the money from driver's wallet
+        walletService.deductMoneyFromWallet(driver.getUser(), platformCommission, null,
+                payment.getRide(), TransactionMethod.RIDE);//method to deduct the money from driver's wallet
 
-
+        paymentService.updatePaymentStatus(payment, PaymentStatus.CONFIRMED);
     }
 }
