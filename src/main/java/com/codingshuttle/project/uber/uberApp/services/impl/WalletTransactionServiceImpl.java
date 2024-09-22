@@ -18,8 +18,6 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     @Override
     public void createNewWalletTransaction(WalletTransaction walletTransaction) {
 
-        WalletTransaction walletTransaction = modelMapper
-                .map(walletTransaction, WalletTransaction.class);
         walletTransactionRepository.save(walletTransaction);
     }
 }

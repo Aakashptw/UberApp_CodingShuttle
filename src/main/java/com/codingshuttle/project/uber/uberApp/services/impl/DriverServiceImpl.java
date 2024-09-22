@@ -82,6 +82,11 @@ public class DriverServiceImpl implements DriverService {
     public RideDto startRide(Long rideId, String otp) {
         //Method to get the ride
         Ride ride = rideService.getRideById(rideId);
+        Driver driver = getCurrentDriver();
+
+        if(!driver.equals(ride.getDriver())){
+            throw new RuntimeException("Driver Cannot start a ride as he has not accepted it earlier");
+        }
 
         if(!ride.getRideStatus().equals(RideStatus.CONFIRMED)) {
             throw new RuntimeException("Ride status is not CONFIRMED hence cannot be started, status: "+ride.getRideStatus());
@@ -100,12 +105,35 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
+    @Transactional
     public RideDto endRide(Long rideId) {
-        return null;
+        //Method to get the ride
+        Ride ride = rideService.getRideById(rideId);
+        Driver driver = getCurrentDriver();
+
+        if(!driver.equals(ride.getDriver())){
+            throw new RuntimeException("Driver Cannot start a ride as he has not accepted it earlier");
+        }
+
+        if(!ride.getRideStatus().equals(RideStatus.ONGOING)) {
+            throw new RuntimeException("Ride status is not ONGOING hence cannot be ended, status: "+ride.getRideStatus());
+        }
+
+        ride.setEndedAt(LocalDateTime.now());//current end time
+        Ride savedRide = rideService.updateRideStatus(ride, RideStatus.ENDED);
+        updateDriverAvailability(driver, true);
+
+        paymentService.processPayment(ride);
+
+        return modelMapper.map(savedRide, RideDto.class);
     }
 
     @Override
     public RiderDto rateRider(Long rideId, Integer rating) {
+        //10 ratingCount = 4.0
+        //new rating is 4.6
+        //updated rating = 4.0 *10 = 40 + 4.6 = 44.6
+        //44.6/11 = 4.05 //10+1 = 11
         return null;
     }
 

@@ -6,7 +6,7 @@ import com.codingshuttle.project.uber.uberApp.entities.enums.PaymentStatus;
 
 public interface PaymentService {
 
-    void processPayment(Payment payment);
+    void processPayment(Ride ride);
 
     Payment createNewPayment(Ride ride);
 
