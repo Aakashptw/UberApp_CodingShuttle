@@ -43,7 +43,10 @@ public class WalletServiceImpl implements WalletService {
                 .build();
 
         //this will create wallet transaction for us
-        walletTransactionService.createNewWalletTransaction(walletTransaction);
+        //walletTransactionService.createNewWalletTransaction(walletTransaction);
+
+        //this will create wallet transaction for us
+        wallet.getTransactions().add(walletTransaction);
 
         return walletRepository.save(wallet);
     }
