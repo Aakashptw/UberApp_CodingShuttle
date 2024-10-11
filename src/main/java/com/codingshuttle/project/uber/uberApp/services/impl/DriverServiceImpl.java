@@ -134,6 +134,18 @@ public class DriverServiceImpl implements DriverService {
         //new rating is 4.6
         //updated rating = 4.0 *10 = 40 + 4.6 = 44.6
         //44.6/11 = 4.05 //10+1 = 11
+
+        Ride ride = rideService.getRideById(rideId);
+        Driver driver = getCurrentDriver();
+
+        if(!driver.equals(ride.getDriver())){
+            throw new RuntimeException("Driver is not the Owner of this Ride");
+        }
+
+        if(!ride.getRideStatus().equals(RideStatus.ENDED)) {
+            throw new RuntimeException("Ride status is not ENDED hence cannot be Rated, status: "+ride.getRideStatus());
+        }
+
         return null;
     }
 
