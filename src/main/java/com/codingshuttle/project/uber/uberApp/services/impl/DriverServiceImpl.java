@@ -10,10 +10,7 @@ import com.codingshuttle.project.uber.uberApp.entities.enums.RideRequestStatus;
 import com.codingshuttle.project.uber.uberApp.entities.enums.RideStatus;
 import com.codingshuttle.project.uber.uberApp.exceptions.ResourceNotFoundException;
 import com.codingshuttle.project.uber.uberApp.repositories.DriverRepository;
-import com.codingshuttle.project.uber.uberApp.services.DriverService;
-import com.codingshuttle.project.uber.uberApp.services.PaymentService;
-import com.codingshuttle.project.uber.uberApp.services.RideRequestService;
-import com.codingshuttle.project.uber.uberApp.services.RideService;
+import com.codingshuttle.project.uber.uberApp.services.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -33,6 +30,7 @@ public class DriverServiceImpl implements DriverService {
     private final RideService rideService;
     private final ModelMapper modelMapper;
     private final PaymentService paymentService;
+    private final RatingService ratingService;
 
 
     @Override
@@ -100,6 +98,7 @@ public class DriverServiceImpl implements DriverService {
         Ride savedRide = rideService.updateRideStatus(ride, RideStatus.ONGOING);
 
         paymentService.createNewPayment(savedRide);//Will create a new payment as soon as ride starts
+        ratingService.createNewRating(savedRide);//Will create a new rating as soon as ride start
 
         return modelMapper.map(savedRide, RideDto.class);
     }
@@ -146,7 +145,8 @@ public class DriverServiceImpl implements DriverService {
             throw new RuntimeException("Ride status is not ENDED hence cannot be Rated, status: "+ride.getRideStatus());
         }
 
-        return null;
+        return ratingService.rateRider(ride, rating);
+
     }
 
     @Override

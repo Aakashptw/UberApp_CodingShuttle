@@ -1,12 +1,18 @@
 package com.codingshuttle.project.uber.uberApp.entities;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Table(indexes = {
         @Index(name = "idx_rating_rider", columnList = "rider_id"),
         @Index(name = "idx_rating_driver", columnList = "driver_id")
 })
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Rating {
 
     @Id
