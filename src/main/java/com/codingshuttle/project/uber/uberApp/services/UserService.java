@@ -1,0 +1,27 @@
+package com.codingshuttle.project.uber.uberApp.services;
+
+import com.codingshuttle.project.uber.uberApp.entities.User;
+import com.codingshuttle.project.uber.uberApp.exceptions.ResourceNotFoundException;
+import com.codingshuttle.project.uber.uberApp.repositories.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class UserService implements UserDetailsService {
+
+    private final UserRepository userRepository;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return null;
+    }
+
+    public User getUserById(Long Id){
+        return userRepository.findById(Id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found by Id: " + Id));
+    }
+}
