@@ -2,6 +2,9 @@ package com.codingshuttle.project.uber.uberApp.controllers;
 
 import com.codingshuttle.project.uber.uberApp.dto.*;
 import com.codingshuttle.project.uber.uberApp.services.AuthService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +28,15 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO loginRequestDTO){
+    ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO loginRequestDTO,
+                                           HttpServletRequest httpServletRequest,
+                                           HttpServletResponse httpServletResponse){
         String tokens[] = authService.login(loginRequestDTO.getEmail(), loginRequestDTO.getPassword());
+
+        Cookie cookie = new Cookie("token", tokens[1]);
+        cookie.setHttpOnly(true);
+
+        httpServletResponse.addCookie(cookie);
 
         return ResponseEntity.ok(new LoginResponseDTO(tokens[0]));
     }
