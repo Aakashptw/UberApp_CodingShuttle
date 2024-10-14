@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/drivers")
-@Secured("ROLE_DRIVER")
+@Secured("ROLE_DRIVER") //only driver would be able to access this APIs
 public class DriverController {
 
     private final DriverService driverService;

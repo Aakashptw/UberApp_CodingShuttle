@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/riders")
 @RequiredArgsConstructor
-@Secured("ROLE_RIDER")
+@Secured("ROLE_RIDER") //Only Rider would be able to access this APIs
 public class RiderController {
 
     private final RiderService riderService;
