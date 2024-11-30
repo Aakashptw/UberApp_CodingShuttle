@@ -3,6 +3,7 @@ package com.codingshuttle.project.uber.uberApp.services.impl;
 import com.codingshuttle.project.uber.uberApp.services.EmailSenderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.naming.factory.BeanFactory;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,8 @@ public class EmailSenderServiceImpl implements EmailSenderService {
             simpleMailMessage.setBcc(toEmail);
             simpleMailMessage.setSubject(subject);
             simpleMailMessage.setText(body);
+
+
 
             javaMailSender.send(simpleMailMessage);
             //to confirm if email got sent or not
